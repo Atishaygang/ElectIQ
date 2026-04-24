@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Home, MessageCircle, Clock, BookOpen, Compass } from 'lucide-react';
+import HomeTab from '../components/citizen/HomeTab';
+import ChatTab from '../components/citizen/ChatTab';
+import TimelineTab from '../components/citizen/TimelineTab';
+import QuizTab from '../components/citizen/QuizTab';
+import ExploreTab from '../components/citizen/ExploreTab';
+
+const CitizenPortal = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const tabs = [
+    { id: '', name: 'Home', icon: Home, path: '/citizen' },
+    { id: 'chat', name: 'Chat', icon: MessageCircle, path: '/citizen/chat' },
+    { id: 'timeline', name: 'Timeline', icon: Clock, path: '/citizen/timeline' },
+    { id: 'quiz', name: 'Quiz', icon: BookOpen, path: '/citizen/quiz' },
+    { id: 'explore', name: 'Explore', icon: Compass, path: '/citizen/explore' }
+  ];
+
+  return (
+    <div className="flex flex-col min-h-screen bg-dark-bg text-gray-100 pb-16">
+      {/* Header */}
+      <header className="bg-dark-card border-b border-gray-800 p-4 sticky top-0 z-40 flex justify-between items-center">
+        <h1 className="text-xl font-heading font-bold text-white flex items-center gap-2">
+          <span aria-hidden="true">🗳️</span>
+          Elect<span className="text-saffron">I</span><span className="text-green">Q</span> Citizen
+        </h1>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-green"></span>
+          </span>
+          <span className="text-xs text-gray-400 font-medium">Live</span>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 w-full max-w-4xl mx-auto p-4 flex flex-col relative">
+        <Routes>
+          <Route path="/" element={<HomeTab navigate={navigate} />} />
+          <Route path="/chat" element={<ChatTab />} />
+          <Route path="/timeline" element={<TimelineTab />} />
+          <Route path="/quiz" element={<QuizTab />} />
+          <Route path="/explore" element={<ExploreTab />} />
+        </Routes>
+      </main>
+
+      {/* Bottom Navigation (Mobile First) */}
+      <nav className="fixed bottom-0 w-full bg-dark-card border-t border-gray-800 flex justify-around p-2 pb-safe z-40">
+        {tabs.map(tab => {
+          const isActive = location.pathname === tab.path || (tab.path !== '/citizen' && location.pathname.startsWith(tab.path));
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => navigate(tab.path)}
+              className={`flex flex-col items-center p-2 rounded-lg transition-colors min-w-[64px] ${isActive ? 'text-saffron' : 'text-gray-500 hover:text-gray-300'}`}
+              aria-label={`${tab.name} Tab`}
+              aria-current={isActive ? "page" : undefined}
+            >
+              <Icon className="w-6 h-6 mb-1" />
+              <span className="text-[10px] font-medium">{tab.name}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
+};
+
+export default CitizenPortal;
