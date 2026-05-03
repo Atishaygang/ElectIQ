@@ -5,6 +5,12 @@ import { ChevronRight, Calendar, MessageSquare, BookOpen, Clock } from 'lucide-r
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
+/**
+ * Home component for Citizen portal showing welcome info and recent questions.
+ * @param {Object} props Component props.
+ * @param {Function} props.navigate Navigation function.
+ * @returns {JSX.Element} HomeTab component.
+ */
 const HomeTab = ({ navigate }) => {
   const [recentQuestions, setRecentQuestions] = useState([]);
   

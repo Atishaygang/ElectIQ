@@ -2,6 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from 'recharts';
 
+/**
+ * Analytics section for the educator portal showing global stats.
+ * @param {Object} props Component props.
+ * @param {Object} props.stats Statistics object.
+ * @param {Array} props.stats.recentList List of recent questions.
+ * @returns {JSX.Element} AnalyticsSection component.
+ */
 const AnalyticsSection = ({ stats }) => {
   const chartData = [
     { day: 'Mon', sessions: 120 }, { day: 'Tue', sessions: 150 }, { day: 'Wed', sessions: 180 },
@@ -48,6 +55,12 @@ AnalyticsSection.propTypes = {
   stats: PropTypes.shape({
     recentList: PropTypes.array
   }).isRequired
+};
+
+AnalyticsSection.defaultProps = {
+  stats: {
+    recentList: []
+  }
 };
 
 export default React.memo(AnalyticsSection);

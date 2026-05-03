@@ -8,31 +8,14 @@ import { APP_CONFIG } from '../../config/appConfig';
 import { useDebounce } from '../../hooks/useDebounce';
 import PropTypes from 'prop-types';
 
-const ChatMessageBubble = React.memo(({ message }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-  >
-    <div 
-      className={`max-w-[85%] p-3 rounded-2xl text-sm ${
-        message.sender === 'user' 
-          ? 'bg-saffron text-white rounded-tr-sm' 
-          : 'bg-dark-card border border-gray-800 text-gray-200 rounded-tl-sm'
-      }`}
-    >
-      {message.text}
-    </div>
-  </motion.div>
-));
+import { logger } from '../../utils/logger';
+import { STRINGS } from '../../constants/strings';
+import ChatMessageBubble from './ChatMessageBubble';
 
-ChatMessageBubble.propTypes = {
-  message: PropTypes.shape({
-    sender: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired
-  }).isRequired
-};
-
+/**
+ * Chat component for Citizen portal.
+ * @returns {JSX.Element} ChatTab component.
+ */
 const ChatTab = () => {
   const location = useLocation();
   const [input, setInput] = useState('');
@@ -43,7 +26,7 @@ const ChatTab = () => {
   const { addQuestion } = useFirebase();
   const messagesEndRef = useRef(null);
 
-  const handleSend = useCallback(async (textToProcess) => {
+  const handleChatSubmit = useCallback(async (textToProcess) => {
     const text = typeof textToProcess === 'string' ? textToProcess : debouncedInput;
     if (!text.trim() || isLoading) return;
     
@@ -53,18 +36,22 @@ const ChatTab = () => {
     try {
       await addQuestion(sanitized, language);
     } catch (e) {
-      // logged by helper
+      logger.error('Failed to add question to Firebase:', e);
     }
     
-    await sendMessage(sanitized);
+    try {
+      await sendMessage(sanitized);
+    } catch (e) {
+      logger.error('Failed to send message to Gemini:', e);
+    }
   }, [debouncedInput, isLoading, sanitizeInput, language, addQuestion, sendMessage]);
 
   useEffect(() => {
     if (location.state?.initialMessage) {
-      handleSend(location.state.initialMessage);
+      handleChatSubmit(location.state.initialMessage);
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, handleSend]);
+  }, [location.state, handleChatSubmit]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -85,7 +72,7 @@ const ChatTab = () => {
   const displayMessages = messages.slice(-APP_CONFIG.MAX_CHAT_HISTORY);
 
   return (
-    <div className="flex flex-col h-full bg-dark-bg absolute inset-0 pb-16" aria-busy={isLoading}>
+    <div className="flex flex-col h-full bg-dark-bg absolute inset-0 pb-16" aria-busy={isLoading ? "true" : "false"}>
       <div className="flex justify-between items-center p-3 border-b border-gray-800 bg-dark-card sticky top-0 z-10">
         <button 
           onClick={toggleLanguage}
@@ -93,7 +80,7 @@ const ChatTab = () => {
           aria-pressed={language === 'hi'}
         >
           <Globe2 size={14} />
-          {language === 'en' ? 'English' : 'हिंदी'}
+          {language === 'en' ? STRINGS.LANGUAGE_EN : STRINGS.LANGUAGE_HI}
         </button>
         <button 
           onClick={clearChat}
@@ -135,7 +122,7 @@ const ChatTab = () => {
           {suggestions.map((s, i) => (
             <button
               key={i}
-              onClick={() => handleSend(s)}
+              onClick={() => handleChatSubmit(s)}
               className="whitespace-nowrap text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-full border border-gray-700 transition"
             >
               {s}
@@ -147,14 +134,14 @@ const ChatTab = () => {
       <div className="p-3 bg-dark-card border-t border-gray-800">
         <form 
           className="relative flex items-center"
-          onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
+          onSubmit={(e) => { e.preventDefault(); handleChatSubmit(input); }}
         >
           <input
             id="chat-input"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value.substring(0, APP_CONFIG.MAX_CHAT_LENGTH))}
-            placeholder={language === 'en' ? "Type a question..." : "प्रश्न पूछें..."}
+            placeholder={language === 'en' ? STRINGS.CHAT_PLACEHOLDER : "प्रश्न पूछें..."}
             className="w-full bg-dark-bg border border-gray-700 text-white rounded-full pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-saffron"
             aria-label="Chat input"
           />
@@ -163,7 +150,7 @@ const ChatTab = () => {
             disabled={!input.trim() || isLoading}
             className="absolute right-2 p-2 bg-saffron text-white rounded-full hover:bg-opacity-90 disabled:opacity-50 transition-opacity"
             aria-label="Send message"
-            aria-disabled={isLoading}
+            aria-disabled={isLoading || !input.trim() ? "true" : "false"}
           >
             <Send size={16} />
           </button>

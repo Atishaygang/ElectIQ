@@ -3,6 +3,10 @@ import { ChevronRight, ArrowRight, MousePointerClick, CheckCircle2 } from 'lucid
 import { motion, AnimatePresence } from 'framer-motion';
 import { ELECTION_TYPES, REGISTRATION_STEPS, HELPLINE_NUMBERS } from '../../constants/electionData';
 
+/**
+ * Explore component for Citizen portal showing election info and guides.
+ * @returns {JSX.Element} ExploreTab component.
+ */
 const ExploreTab = () => {
   const [openSection, setOpenSection] = useState(null);
 

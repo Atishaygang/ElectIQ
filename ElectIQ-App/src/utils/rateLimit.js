@@ -1,5 +1,8 @@
 import { APP_CONFIG } from '../config/appConfig';
 
+/**
+ * RateLimiter class to limit actions over a time window.
+ */
 class RateLimiter {
   constructor(limit, timeWindowMs) {
     this.limit = limit;
@@ -24,5 +27,5 @@ class RateLimiter {
   }
 }
 
-// Global rate limiter instance for chat
+/** Global rate limiter instance for chat */
 export const chatRateLimiter = new RateLimiter(APP_CONFIG.RATE_LIMIT_PER_MINUTE, 60 * 1000);

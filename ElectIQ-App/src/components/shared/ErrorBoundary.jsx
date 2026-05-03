@@ -1,7 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ErrorMessage from './ErrorMessage';
+import { logger } from '../../utils/logger';
 
+/**
+ * ErrorBoundary catches JavaScript errors anywhere in their child component tree.
+ */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -14,7 +18,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     if (import.meta.env.DEV) {
-      console.error("ErrorBoundary caught an error", error, errorInfo);
+      logger.error("ErrorBoundary caught an error", error, errorInfo);
     }
   }
 
@@ -30,6 +34,10 @@ class ErrorBoundary extends React.Component {
 ErrorBoundary.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node
+};
+
+ErrorBoundary.defaultProps = {
+  fallback: null
 };
 
 export default ErrorBoundary;

@@ -1,14 +1,16 @@
 import React, { useState, startTransition, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Home, MessageCircle, Clock, BookOpen, Compass, Globe } from 'lucide-react';
-import HomeTab from '../components/citizen/HomeTab';
-import ChatTab from '../components/citizen/ChatTab';
-import TimelineTab from '../components/citizen/TimelineTab';
-import QuizTab from '../components/citizen/QuizTab';
-import ExploreTab from '../components/citizen/ExploreTab';
-import ErrorBoundary from '../components/shared/ErrorBoundary';
+import { HomeTab, ChatTab, TimelineTab, QuizTab, ExploreTab } from '../components/citizen';
+import { ErrorBoundary } from '../components/shared';
+import { STRINGS } from '../constants/strings';
+import { ROUTES } from '../constants/routes';
 import PropTypes from 'prop-types';
 
+/**
+ * CitizenPortal component containing routing and navigation for the citizen side.
+ * @returns {JSX.Element} CitizenPortal component.
+ */
 const CitizenPortal = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,11 +33,11 @@ const CitizenPortal = () => {
   }, [navigate]);
 
   const tabs = [
-    { id: '', name: 'Home', icon: Home, path: '/citizen' },
-    { id: 'chat', name: 'Chat', icon: MessageCircle, path: '/citizen/chat' },
-    { id: 'timeline', name: 'Timeline', icon: Clock, path: '/citizen/timeline' },
-    { id: 'quiz', name: 'Quiz', icon: BookOpen, path: '/citizen/quiz' },
-    { id: 'explore', name: 'Explore', icon: Compass, path: '/citizen/explore' }
+    { id: '', name: 'Home', icon: Home, path: ROUTES.CITIZEN },
+    { id: 'chat', name: 'Chat', icon: MessageCircle, path: `${ROUTES.CITIZEN}/chat` },
+    { id: 'timeline', name: 'Timeline', icon: Clock, path: `${ROUTES.CITIZEN}/timeline` },
+    { id: 'quiz', name: 'Quiz', icon: BookOpen, path: `${ROUTES.CITIZEN}/quiz` },
+    { id: 'explore', name: 'Explore', icon: Compass, path: `${ROUTES.CITIZEN}/explore` }
   ];
 
   return (
@@ -61,7 +63,7 @@ const CitizenPortal = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green"></span>
             </span>
-            <span className="text-xs text-gray-400 font-medium">Live</span>
+            <span className="text-xs text-gray-400 font-medium" role="status">{STRINGS.FIREBASE_LIVE}</span>
           </div>
         </div>
       </header>

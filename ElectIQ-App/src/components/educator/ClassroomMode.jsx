@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { TIMELINE_STEPS } from '../../constants/electionData';
 
+/**
+ * Classroom Mode component for educator portal presentation.
+ * @returns {JSX.Element} ClassroomMode component.
+ */
 const ClassroomMode = () => {
   const [step, setStep] = useState(0);
 

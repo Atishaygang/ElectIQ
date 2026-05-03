@@ -10,7 +10,8 @@ export const sanitizeInput = (input) => {
   return input
     .replace(/<script[^>]*?>.*?<\/script>/gi, '')
     .replace(/<img[^>]*?>/gi, '')
-    .replace(/<[^>]*>?/gm, '');
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/\bonclick\s*=\s*(?:'[^']*'|"[^"]*"|[^>\s]+)/gi, '');
 };
 
 /**

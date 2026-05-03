@@ -6,91 +6,13 @@ import { Trophy, CheckCircle2, XCircle } from 'lucide-react';
 import { useFirebase } from '../../hooks/useFirebase';
 import PropTypes from 'prop-types';
 
-const QuestionCard = React.memo(({ q, currentIdx, total, difficulty, selectedOpt, showExpl, onSelect, onNext, isLast }) => {
-  return (
-    <div className="space-y-6 relative h-full">
-      <div className="flex justify-between items-center text-sm text-gray-400">
-        <span className="capitalize">{difficulty} Level</span>
-        <span>{currentIdx + 1} / {total}</span>
-      </div>
-      
-      {/* Progress Bar */}
-      <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-        <div className="h-full bg-saffron transition-all duration-300" style={{ width: `${((currentIdx) / total) * 100}%` }}></div>
-      </div>
+import { logger } from '../../utils/logger';
+import QuestionCard from './QuestionCard';
 
-      <motion.div
-        key={currentIdx}
-        initial={{ x: 20, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: -20, opacity: 0 }}
-        className="bg-dark-card border border-gray-800 p-6 rounded-xl space-y-6"
-      >
-        <h3 id="question-text" className="text-xl font-medium text-white leading-tight">{q.text}</h3>
-        
-        <div className="space-y-3" role="radiogroup" aria-labelledby="question-text">
-          {q.options.map((opt, i) => {
-            const isSelected = selectedOpt === i;
-            const isCorrect = q.correct === i;
-            let btnClass = "bg-dark-bg border-gray-700 hover:border-gray-500 text-gray-300";
-            
-            if (showExpl) {
-              if (isCorrect) btnClass = "bg-green/20 border-green text-green";
-              else if (isSelected && !isCorrect) btnClass = "bg-red-500/20 border-red-500 text-red-500";
-              else btnClass = "bg-dark-bg border-gray-800 text-gray-600 opacity-50";
-            }
-
-            return (
-              <button
-                key={i}
-                role="radio"
-                aria-checked={isSelected}
-                disabled={showExpl}
-                onClick={() => onSelect(i)}
-                aria-describedby={showExpl ? "expl-text" : undefined}
-                className={`w-full text-left p-4 rounded-lg border transition flex justify-between items-center ${btnClass}`}
-              >
-                <span>{opt}</span>
-                {showExpl && isCorrect && <CheckCircle2 size={18} className="text-green" />}
-                {showExpl && isSelected && !isCorrect && <XCircle size={18} className="text-red-500" />}
-              </button>
-            )
-          })}
-        </div>
-
-        <AnimatePresence>
-          {showExpl && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pt-4" role="alert" aria-live="assertive">
-              <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg">
-                <p className="text-sm font-medium text-blue-400">Explanation</p>
-                <p id="expl-text" className="text-sm text-gray-300 mt-1">{q.expl}</p>
-              </div>
-              <button
-                onClick={onNext}
-                className="mt-6 w-full bg-saffron text-white py-3 rounded-lg font-bold hover:bg-opacity-90 transition"
-              >
-                {isLast ? 'See Results' : 'Next Question'}
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
-  );
-});
-
-QuestionCard.propTypes = {
-  q: PropTypes.object.isRequired,
-  currentIdx: PropTypes.number.isRequired,
-  total: PropTypes.number.isRequired,
-  difficulty: PropTypes.string.isRequired,
-  selectedOpt: PropTypes.number,
-  showExpl: PropTypes.bool.isRequired,
-  onSelect: PropTypes.func.isRequired,
-  onNext: PropTypes.func.isRequired,
-  isLast: PropTypes.bool.isRequired
-};
-
+/**
+ * Quiz component for Citizen portal.
+ * @returns {JSX.Element} QuizTab component.
+ */
 const QuizTab = () => {
   const [difficulty, setDifficulty] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -137,7 +59,7 @@ const QuizTab = () => {
         setShowExpl(false);
       });
     } catch (e) {
-      console.error(e);
+      logger.error('Failed to load quiz:', e);
     } finally {
       setLoadingQuiz(false);
     }
@@ -158,7 +80,9 @@ const QuizTab = () => {
       try {
         const finalScore = score + (selectedOpt === questions[currentIdx].correct ? 1 : 0);
         await addQuizScore(finalScore, questions.length, difficulty, "Citizen_" + Math.floor(Math.random() * 1000));
-      } catch (e) {}
+      } catch (e) {
+        logger.error('Failed to save quiz score:', e);
+      }
     } else {
       setSelectedOpt(null);
       setShowExpl(false);
@@ -168,7 +92,7 @@ const QuizTab = () => {
 
   if (!difficulty || questions.length === 0) {
     return (
-      <div className="space-y-6" aria-busy={loadingQuiz}>
+      <div className="space-y-6" aria-busy={loadingQuiz ? "true" : "false"}>
         <h2 className="text-2xl font-bold font-heading">Test Your Knowledge</h2>
         <div className="grid gap-4">
           {['basic', 'intermediate', 'advanced'].map(level => (

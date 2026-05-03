@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { GOOGLE_SERVICES } from '../config/googleServices';
 import { CheckSquare, BrainCircuit, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { STRINGS } from '../constants/strings';
+import { ROUTES } from '../constants/routes';
 
+/**
+ * Landing page component.
+ * @returns {JSX.Element} LandingPage component.
+ */
 const LandingPage = () => {
   const navigate = useNavigate();
 
@@ -29,7 +35,7 @@ const LandingPage = () => {
             Elect<span className="text-saffron">I</span><span className="text-green">Q</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 font-medium">
-            Understand Your Vote. Empower Your Democracy.
+            {STRINGS.TAGLINE}
           </p>
         </motion.div>
 
@@ -38,7 +44,7 @@ const LandingPage = () => {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/citizen')}
+            onClick={() => navigate(ROUTES.CITIZEN)}
             className="flex-1 bg-dark-card border-2 border-saffron hover:bg-saffron/10 p-8 rounded-2xl flex flex-col items-center justify-center gap-4 transition-colors group cursor-pointer focus-visible:outline-white"
             aria-label="Enter Citizen Portal"
           >
@@ -49,7 +55,7 @@ const LandingPage = () => {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/educator')}
+            onClick={() => navigate(ROUTES.EDUCATOR)}
             className="flex-1 bg-dark-card border-2 border-green hover:bg-green/10 p-8 rounded-2xl flex flex-col items-center justify-center gap-4 transition-colors group cursor-pointer focus-visible:outline-white"
             aria-label="Enter Educator Portal"
           >

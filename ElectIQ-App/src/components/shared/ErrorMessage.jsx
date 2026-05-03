@@ -1,7 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AlertCircle } from 'lucide-react';
-
+/**
+ * Displays an error message with an icon.
+ * @param {Object} props Component props.
+ * @param {string} props.message Error message text.
+ * @returns {JSX.Element} ErrorMessage component.
+ */
 const ErrorMessage = ({ message }) => {
   return (
     <div role="alert" className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex items-center gap-3">

@@ -7,6 +7,10 @@ import QuizBuilderSection from '../components/educator/QuizBuilderSection';
 import ClassroomMode from '../components/educator/ClassroomMode';
 import AnalyticsSection from '../components/educator/AnalyticsSection';
 
+/**
+ * Educator Portal page component.
+ * @returns {JSX.Element} EducatorPortal component.
+ */
 const EducatorPortal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState({ questions: 0, popularQuiz: 'Basic', sessions: Math.floor(Math.random() * 500) + 150, recentList: [] });
@@ -55,6 +59,7 @@ const EducatorPortal = () => {
               <button
                 key={item.id}
                 onClick={() => handleTabSwitch(item.id)}
+                aria-current={isActive ? "page" : undefined}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-sm font-medium ${isActive ? 'bg-green/10 text-green' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`}
               >
                 <Icon size={18} />

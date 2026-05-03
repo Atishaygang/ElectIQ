@@ -3,6 +3,12 @@ import PropTypes from 'prop-types';
 import { GOOGLE_SERVICES } from '../../config/googleServices';
 import { CheckCircle2 } from 'lucide-react';
 
+/**
+ * Dashboard section for educator portal.
+ * @param {Object} props Component props.
+ * @param {Object} props.stats Statistics object.
+ * @returns {JSX.Element} DashboardSection component.
+ */
 const DashboardSection = ({ stats }) => (
   <div className="space-y-6">
     <h2 className="text-2xl font-bold font-heading">Educator Dashboard</h2>
@@ -47,6 +53,15 @@ DashboardSection.propTypes = {
     sessions: PropTypes.number.isRequired,
     recentList: PropTypes.array
   }).isRequired
+};
+
+DashboardSection.defaultProps = {
+  stats: {
+    questions: 0,
+    popularQuiz: 'Basic',
+    sessions: 0,
+    recentList: []
+  }
 };
 
 export default React.memo(DashboardSection);

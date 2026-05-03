@@ -14,7 +14,25 @@ const turnoutData = [
   { year: '2024', turnout: 65.8 },
 ];
 
-const TimelineStep = React.memo(({ step, isExpanded, onToggle }) => {
+/**
+ * Renders a single timeline step.
+ * @param {Object} props Component props.
+ * @param {Object} props.step The step data.
+ * @param {boolean} props.isExpanded Is the step expanded.
+ * @param {Function} props.onToggle Toggle handler.
+ * @param {number} props.index The step index.
+ * @param {number} props.totalSteps Total number of steps.
+ * @returns {JSX.Element} TimelineStep component.
+ */
+const TimelineStep = React.memo(({ step, isExpanded, onToggle, index, totalSteps }) => {
+  const contentRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (isExpanded && contentRef.current) {
+      contentRef.current.focus();
+    }
+  }, [isExpanded]);
+
   const getIcon = () => {
     if (step.status === 'completed') return <CheckCircle2 className="text-green w-6 h-6" />;
     if (step.status === 'current') return <CircleDot className="text-saffron w-6 h-6 animate-pulse" />;
@@ -34,6 +52,8 @@ const TimelineStep = React.memo(({ step, isExpanded, onToggle }) => {
         onClick={onToggle}
         aria-label={`Toggle Step ${step.id}: ${step.title}`}
         aria-expanded={isExpanded}
+        aria-setsize={totalSteps}
+        aria-posinset={index + 1}
       >
         {getIcon()}
       </button>
@@ -55,11 +75,13 @@ const TimelineStep = React.memo(({ step, isExpanded, onToggle }) => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden mt-3"
             >
-              <p className="text-sm text-gray-400 mb-3">{step.desc}</p>
-              
-              <div className="bg-saffron/10 border border-saffron/30 rounded p-3 mb-3 flex gap-2 items-start">
-                <Info size={16} className="text-saffron shrink-0 mt-0.5" />
-                <p className="text-xs text-saffron font-medium">Key Rule: {step.rule}</p>
+              <div ref={contentRef} tabIndex={-1} className="outline-none">
+                <p className="text-sm text-gray-400 mb-3">{step.desc}</p>
+                
+                <div className="bg-saffron/10 border border-saffron/30 rounded p-3 mb-3 flex gap-2 items-start">
+                  <Info size={16} className="text-saffron shrink-0 mt-0.5" />
+                  <p className="text-xs text-saffron font-medium">Key Rule: {step.rule}</p>
+                </div>
               </div>
 
               <div className="flex justify-end">
@@ -88,9 +110,15 @@ TimelineStep.propTypes = {
     rule: PropTypes.string.isRequired
   }).isRequired,
   isExpanded: PropTypes.bool.isRequired,
-  onToggle: PropTypes.func.isRequired
+  onToggle: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
+  totalSteps: PropTypes.number.isRequired
 };
 
+/**
+ * Timeline component for Citizen portal.
+ * @returns {JSX.Element} TimelineTab component.
+ */
 const TimelineTab = () => {
   const [expandedId, setExpandedId] = useState(4); // default expanded is the current one
 
@@ -106,12 +134,14 @@ const TimelineTab = () => {
       </div>
 
       <div className="bg-dark-card border border-gray-800 rounded-xl p-4">
-        {TIMELINE_STEPS.map((step) => (
+        {TIMELINE_STEPS.map((step, idx) => (
           <TimelineStep 
             key={step.id} 
             step={step} 
             isExpanded={expandedId === step.id}
             onToggle={() => handleToggle(step.id)}
+            index={idx}
+            totalSteps={TIMELINE_STEPS.length}
           />
         ))}
       </div>
