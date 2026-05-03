@@ -1,22 +1,25 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
-import CitizenPortal from './pages/CitizenPortal';
+import ErrorBoundary from './components/shared/ErrorBoundary';
+import LoadingSpinner from './components/shared/LoadingSpinner';
 
-// Educator Portal lazy loaded as requested for efficiency
 const EducatorPortal = lazy(() => import('./pages/EducatorPortal'));
+const CitizenPortal = lazy(() => import('./pages/CitizenPortal'));
 
 function App() {
   return (
     <Router>
       <main id="main-content" className="w-full h-full min-h-screen">
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-pulse text-saffron">Loading...</div></div>}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/citizen/*" element={<CitizenPortal />} />
-            <Route path="/educator/*" element={<EducatorPortal />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><LoadingSpinner text="Loading Portal..." /></div>}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/citizen/*" element={<CitizenPortal />} />
+              <Route path="/educator/*" element={<EducatorPortal />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
     </Router>
   );

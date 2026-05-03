@@ -1,5 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { validateChatMessage, sanitizeInput } from '../utils/sanitize';
+import { chatRateLimiter } from '../utils/rateLimit';
+import { logger } from '../utils/logger';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -14,26 +17,14 @@ const FAQ_FALLBACK = {
   "default": "I'm having trouble connecting right now, but I can tell you that the Election Commission of India (ECI) conducts elections. Try asking me again in a moment."
 };
 
-const sanitizeInput = (text) => {
-  if (!text) return '';
-  // Strip HTML tags
-  let cleanText = text.replace(/<\/?[^>]+(>|$)/g, "");
-  // Trim whitespace
-  cleanText = cleanText.trim();
-  // Limit to 500 characters
-  if (cleanText.length > 500) {
-    cleanText = cleanText.substring(0, 500);
-  }
-  return cleanText;
-};
-
+/**
+ * Hook to interact with the Gemini AI model.
+ */
 export const useGemini = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   
   const chatSessionRef = useRef(null);
-  const requestsThisMinuteRef = useRef(0);
-  const lastResetTimeRef = useRef(Date.now());
 
   const initChat = async () => {
     try {
@@ -48,32 +39,28 @@ export const useGemini = () => {
         }))
       });
     } catch (e) {
-      console.error("Failed to init chat", e);
+      logger.error("Failed to init chat", e);
     }
   };
 
-  const checkRateLimit = () => {
-    const now = Date.now();
-    if (now - lastResetTimeRef.current > 60000) {
-      // Reset after a minute
-      requestsThisMinuteRef.current = 0;
-      lastResetTimeRef.current = now;
-    }
-    
-    if (requestsThisMinuteRef.current >= 10) {
-      return false;
-    }
-    requestsThisMinuteRef.current += 1;
-    return true;
-  };
+  /**
+   * Memoized parsing function for response text.
+   */
+  const parseResponse = useCallback((result) => {
+    return result.response.text();
+  }, []);
 
+  /**
+   * Sends a message to the Gemini API.
+   * @param {string} userText 
+   */
   const sendMessage = useCallback(async (userText) => {
-    const sanitizedText = sanitizeInput(userText);
+    const sanitizedText = validateChatMessage(userText);
     if (!sanitizedText) return;
 
     setMessages(prev => [...prev, { id: Date.now(), text: sanitizedText, sender: 'user' }]);
     
-    if (!checkRateLimit()) {
+    if (chatRateLimiter.isRateLimited()) {
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
         text: "You've reached the limit of 10 messages per minute. Please wait a moment.", 
@@ -90,22 +77,22 @@ export const useGemini = () => {
       }
       
       const result = await chatSessionRef.current.sendMessage(sanitizedText);
-      const responseText = result.response.text();
+      const responseText = parseResponse(result);
       
       setMessages(prev => [...prev, { id: Date.now() + 1, text: responseText, sender: 'bot' }]);
     } catch (error) {
-      console.error("Gemini API Error:", error);
+      logger.error("Gemini API Error:", error);
       // Fallback
       setMessages(prev => [...prev, { id: Date.now() + 1, text: FAQ_FALLBACK.default, sender: 'bot' }]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [parseResponse]);
 
-  const clearChat = () => {
+  const clearChat = useCallback(() => {
     setMessages([]);
     chatSessionRef.current = null;
-  };
+  }, []);
 
   return { messages, setMessages, sendMessage, isLoading, clearChat, sanitizeInput };
 };

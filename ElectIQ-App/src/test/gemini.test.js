@@ -2,18 +2,26 @@ import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useGemini } from '../hooks/useGemini';
 
-// Mock the Gemini SDK
+// Mock the Gemini SDK properly with classes
+class MockGenerativeModel {
+  startChat() {
+    return {
+      sendMessage: vi.fn().mockResolvedValue({
+        response: { text: () => 'Mocked response' }
+      })
+    };
+  }
+}
+
+class MockGoogleGenerativeAI {
+  getGenerativeModel() {
+    return new MockGenerativeModel();
+  }
+}
+
 vi.mock('@google/generative-ai', () => {
   return {
-    GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
-      getGenerativeModel: vi.fn().mockReturnValue({
-        startChat: vi.fn().mockReturnValue({
-          sendMessage: vi.fn().mockResolvedValue({
-            response: { text: () => 'Mocked response' }
-          })
-        })
-      })
-    }))
+    GoogleGenerativeAI: MockGoogleGenerativeAI
   };
 });
 

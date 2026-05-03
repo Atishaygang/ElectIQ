@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import CitizenPortal from '../pages/CitizenPortal';
 // Mock Firebase and Recharts to prevent errors during integration tests
@@ -10,16 +10,21 @@ vi.mock('firebase/database', () => ({
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({children}) => <div>{children}</div>, BarChart: () => null
 }));
+vi.mock('../hooks/useFirebase', () => ({
+  useFirebase: () => ({ addQuestion: vi.fn(), addQuizScore: vi.fn() })
+}));
 
 describe('Citizen Portal Integration', () => {
-  it('renders standard tabs and navigates correctly', () => {
-    render(
-      <MemoryRouter initialEntries={['/citizen']}>
-        <Routes>
-          <Route path="/citizen/*" element={<CitizenPortal />} />
-        </Routes>
-      </MemoryRouter>
-    );
+  it('renders standard tabs and navigates correctly', async () => {
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={['/citizen']}>
+          <Routes>
+            <Route path="/citizen/*" element={<CitizenPortal />} />
+          </Routes>
+        </MemoryRouter>
+      );
+    });
 
     expect(screen.getByText(/ElectIQ/i)).toBeInTheDocument();
     

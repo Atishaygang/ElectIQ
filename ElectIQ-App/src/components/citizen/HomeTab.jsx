@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../../config/firebase';
 import { ref, query, limitToLast, onValue } from 'firebase/database';
 import { ChevronRight, Calendar, MessageSquare, BookOpen, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
 
 const HomeTab = ({ navigate }) => {
   const [recentQuestions, setRecentQuestions] = useState([]);
   
   // Calculate countdown to next election (mocking an arbitrary future date)
-  const nextElectionDate = new Date('2029-04-15T00:00:00');
+  const nextElectionDate = useMemo(() => new Date('2029-04-15T00:00:00'), []);
   const [daysLeft, setDaysLeft] = useState(0);
 
   useEffect(() => {
@@ -29,18 +30,18 @@ const HomeTab = ({ navigate }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [nextElectionDate]);
 
-  const quickActions = [
+  const quickActions = useMemo(() => [
     { title: "How do I vote?", icon: <MessageSquare size={20} />, bg: "bg-saffron/20 border-saffron/50 text-saffron" },
     { title: "What is EVM?", icon: <BookOpen size={20} />, bg: "bg-green/20 border-green/50 text-green" },
     { title: "Check my constituency", icon: <MessageSquare size={20} />, bg: "bg-blue-500/20 border-blue-500/50 text-blue-400" },
     { title: "Election timeline", icon: <Clock size={20} />, bg: "bg-purple-500/20 border-purple-500/50 text-purple-400" },
-  ];
+  ], []);
 
-  const handleQuickAction = (question) => {
+  const handleQuickAction = useCallback((question) => {
     navigate('/citizen/chat', { state: { initialMessage: question } });
-  };
+  }, [navigate]);
 
   return (
     <div className="space-y-6 pb-6">
@@ -113,4 +114,8 @@ const HomeTab = ({ navigate }) => {
   );
 };
 
-export default HomeTab;
+HomeTab.propTypes = {
+  navigate: PropTypes.func.isRequired
+};
+
+export default React.memo(HomeTab);

@@ -1,3 +1,6 @@
+/**
+ * Registry of Google Services used in the application.
+ */
 export const GOOGLE_SERVICES = {
   cloudRun: { name: 'Google Cloud Run', usage: 'Production hosting + auto-scaling', status: 'active' },
   geminiAPI: { name: 'Gemini API', usage: 'AI-powered election chatbot', status: 'active' },

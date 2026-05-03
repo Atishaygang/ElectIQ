@@ -30,6 +30,13 @@
   box-sizing: border-box;
 }
 
+/* Optimize animations */
+[class*="animate-"],
+.framer-motion,
+[data-framer-component] {
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

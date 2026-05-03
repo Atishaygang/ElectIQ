@@ -1,15 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, startTransition, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { Home, MessageCircle, Clock, BookOpen, Compass } from 'lucide-react';
+import { Home, MessageCircle, Clock, BookOpen, Compass, Globe } from 'lucide-react';
 import HomeTab from '../components/citizen/HomeTab';
 import ChatTab from '../components/citizen/ChatTab';
 import TimelineTab from '../components/citizen/TimelineTab';
 import QuizTab from '../components/citizen/QuizTab';
 import ExploreTab from '../components/citizen/ExploreTab';
+import ErrorBoundary from '../components/shared/ErrorBoundary';
+import PropTypes from 'prop-types';
 
 const CitizenPortal = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [lang, setLang] = useState('en');
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  const toggleLanguage = useCallback(() => {
+    startTransition(() => {
+      setLang(prev => prev === 'en' ? 'hi' : 'en');
+    });
+  }, []);
+
+  const handleTabClick = useCallback((path) => {
+    startTransition(() => {
+      navigate(path);
+    });
+  }, [navigate]);
 
   const tabs = [
     { id: '', name: 'Home', icon: Home, path: '/citizen' },
@@ -27,24 +46,37 @@ const CitizenPortal = () => {
           <span aria-hidden="true">🗳️</span>
           Elect<span className="text-saffron">I</span><span className="text-green">Q</span> Citizen
         </h1>
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green"></span>
-          </span>
-          <span className="text-xs text-gray-400 font-medium">Live</span>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={toggleLanguage}
+            aria-label="Toggle Language"
+            aria-pressed={lang === 'hi'}
+            className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded border transition-colors ${lang === 'hi' ? 'bg-saffron text-white border-saffron' : 'border-gray-700 text-gray-400'}`}
+          >
+            <Globe size={14} />
+            {lang === 'en' ? 'HI' : 'EN'}
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green"></span>
+            </span>
+            <span className="text-xs text-gray-400 font-medium">Live</span>
+          </div>
         </div>
       </header>
 
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-4xl mx-auto p-4 flex flex-col relative">
-        <Routes>
-          <Route path="/" element={<HomeTab navigate={navigate} />} />
-          <Route path="/chat" element={<ChatTab />} />
-          <Route path="/timeline" element={<TimelineTab />} />
-          <Route path="/quiz" element={<QuizTab />} />
-          <Route path="/explore" element={<ExploreTab />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<HomeTab navigate={navigate} />} />
+            <Route path="/chat" element={<ChatTab />} />
+            <Route path="/timeline" element={<TimelineTab />} />
+            <Route path="/quiz" element={<QuizTab />} />
+            <Route path="/explore" element={<ExploreTab />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
 
       {/* Bottom Navigation (Mobile First) */}
@@ -55,7 +87,7 @@ const CitizenPortal = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => navigate(tab.path)}
+              onClick={() => handleTabClick(tab.path)}
               className={`flex flex-col items-center p-2 rounded-lg transition-colors min-w-[64px] ${isActive ? 'text-saffron' : 'text-gray-500 hover:text-gray-300'}`}
               aria-label={`${tab.name} Tab`}
               aria-current={isActive ? "page" : undefined}
@@ -69,5 +101,7 @@ const CitizenPortal = () => {
     </div>
   );
 };
+
+CitizenPortal.propTypes = {};
 
 export default CitizenPortal;

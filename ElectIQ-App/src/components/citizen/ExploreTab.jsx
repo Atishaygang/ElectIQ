@@ -1,22 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ChevronRight, ArrowRight, MousePointerClick, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ELECTION_TYPES, REGISTRATION_STEPS, HELPLINE_NUMBERS } from '../../constants/electionData';
 
 const ExploreTab = () => {
   const [openSection, setOpenSection] = useState(null);
 
-  const toggleSection = (id) => {
-    setOpenSection(openSection === id ? null : id);
-  };
-
-  const formSteps = [
-    "Visit voters.eci.gov.in or download Voter Helpline App",
-    "Register/Login to your account",
-    "Click on 'New Voter Registration (Form 6)'",
-    "Upload Passport size photograph",
-    "Upload Address Proof and Age Proof documents",
-    "Submit and note down Reference ID to track status"
-  ];
+  const toggleSection = useCallback((id) => {
+    setOpenSection(prev => prev === id ? null : id);
+  }, []);
 
   return (
     <div className="space-y-6 pb-8">
@@ -24,12 +16,7 @@ const ExploreTab = () => {
       
       {/* Types of Elections */}
       <div className="grid grid-cols-2 gap-4">
-        {[
-          { title: "Lok Sabha", desc: "General Elections for Prime Minister", color: "from-saffron to-orange-600" },
-          { title: "Rajya Sabha", desc: "Council of States (Indirectly elected)", color: "from-purple-600 to-indigo-600" },
-          { title: "Vidhan Sabha", desc: "State Assembly for Chief Minister", color: "from-green to-emerald-600" },
-          { title: "Local Body", desc: "Panchayat & Municipal Elections", color: "from-blue-600 to-cyan-600" }
-        ].map(card => (
+        {ELECTION_TYPES.map(card => (
           <div key={card.title} className={`bg-gradient-to-br ${card.color} p-4 rounded-xl shadow-lg relative overflow-hidden group cursor-pointer`}>
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
               <span className="text-6xl" aria-hidden="true">🏛️</span>
@@ -45,13 +32,15 @@ const ExploreTab = () => {
         <button 
           onClick={() => toggleSection('evm')}
           className="w-full flex justify-between items-center p-4 bg-gray-800/20 hover:bg-gray-800/40 transition"
+          aria-expanded={openSection === 'evm'}
+          aria-controls="evm-section"
         >
           <span className="font-bold font-heading text-lg">EVM Flow Diagram</span>
           <ChevronRight size={20} className={`transform transition-transform ${openSection === 'evm' ? 'rotate-90' : ''}`} />
         </button>
         <AnimatePresence>
           {openSection === 'evm' && (
-            <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+            <motion.div id="evm-section" initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
               <div className="p-6 flex flex-col items-center gap-4">
                 {/* SVG EVM Diagram Mock */}
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full">
@@ -90,16 +79,18 @@ const ExploreTab = () => {
         <button 
           onClick={() => toggleSection('registration')}
           className="w-full flex justify-between items-center p-4 bg-gray-800/20 hover:bg-gray-800/40 transition"
+          aria-expanded={openSection === 'registration'}
+          aria-controls="registration-section"
         >
           <span className="font-bold font-heading text-lg">Registration Guide (Form 6)</span>
           <ChevronRight size={20} className={`transform transition-transform ${openSection === 'registration' ? 'rotate-90' : ''}`} />
         </button>
         <AnimatePresence>
           {openSection === 'registration' && (
-            <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+            <motion.div id="registration-section" initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
               <div className="p-6">
                 <ol className="relative border-l border-gray-700 ml-3 space-y-6">
-                  {formSteps.map((step, idx) => (
+                  {REGISTRATION_STEPS.map((step, idx) => (
                     <li key={idx} className="pl-6">
                       <span className="absolute flex items-center justify-center w-6 h-6 bg-saffron rounded-full -left-3 ring-4 ring-dark-card text-xs font-bold text-white">
                         {idx + 1}
@@ -125,12 +116,12 @@ const ExploreTab = () => {
           title="Map showing ECI Headquarters"
         ></iframe>
         <div className="mt-4 flex gap-4 text-sm text-gray-400 border-t border-gray-800 pt-3">
-          <p><strong>Voter Helpline:</strong> 1950</p>
-          <p><strong>Toll Free:</strong> 1800-111-950</p>
+          <p><strong>Voter Helpline:</strong> {HELPLINE_NUMBERS.voterHelpline}</p>
+          <p><strong>Toll Free:</strong> {HELPLINE_NUMBERS.tollFree}</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default ExploreTab;
+export default React.memo(ExploreTab);

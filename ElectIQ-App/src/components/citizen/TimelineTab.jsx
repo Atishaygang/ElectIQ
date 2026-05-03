@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Info, Share2, CheckCircle2, CircleDot, Circle } from 'lucide-react';
+import { TIMELINE_STEPS } from '../../constants/electionData';
+import PropTypes from 'prop-types';
 
 const turnoutData = [
   { year: '1952', turnout: 45.7 },
@@ -10,21 +12,6 @@ const turnoutData = [
   { year: '2014', turnout: 66.4 },
   { year: '2019', turnout: 67.4 },
   { year: '2024', turnout: 65.8 },
-];
-
-const timelineSteps = [
-  { id: 1, title: "Election Commission Announcement", desc: "ECI announces the schedule, dates, and phases of the upcoming election.", rule: "Must be announced well in advance", duration: "1 day", status: 'completed' },
-  { id: 2, title: "Model Code of Conduct Begins", desc: "Immediate effect after announcement. Guidelines for political parties and candidates.", rule: "Govt cannot announce new projects", duration: "Until results", status: 'completed' },
-  { id: 3, title: "Voter List Finalization", desc: "Updating the electoral roll, adding new voters, removing deceased.", rule: "Cutoff date usually before nomination", duration: "Continuous", status: 'completed' },
-  { id: 4, title: "Nomination Filing (Form 2B)", desc: "Candidates file their nomination papers along with an affidavit.", rule: "Must disclose assets and criminal records", duration: "7 days", status: 'current' },
-  { id: 5, title: "Scrutiny of Nominations", desc: "Returning Officer checks the validity of the filed nomination papers.", rule: "Can be rejected for incomplete info", duration: "1-2 days", status: 'upcoming' },
-  { id: 6, title: "Withdrawal of Candidature", desc: "Candidates can voluntarily withdraw their names from the contest.", rule: "Notice must be given in writing", duration: "2 days", status: 'upcoming' },
-  { id: 7, title: "Campaign Period", desc: "Parties and candidates campaign to win over voters.", rule: "Strict expenditure limits apply", duration: "14-21 days", status: 'upcoming' },
-  { id: 8, title: "Campaign Silence Period", desc: "All public campaigning must stop 48 hours before polling begins.", rule: "Section 126 of RPA 1951", duration: "48 hours", status: 'upcoming' },
-  { id: 9, title: "Polling Day", desc: "Voters cast their vote using Electronic Voting Machines (EVMs).", rule: "Requires Voter ID or approved document", duration: "1 day (per phase)", status: 'upcoming' },
-  { id: 10, title: "EVM Sealing & Storage", desc: "EVMs are sealed and transported to secure strong rooms under guard.", rule: "Accompanied by party agents", duration: "1-2 days", status: 'upcoming' },
-  { id: 11, title: "Vote Counting", desc: "Votes are counted transparently under the supervision of the Returning Officer.", rule: "VVPAT matching can happen", duration: "1 day", status: 'upcoming' },
-  { id: 12, title: "Result Declaration & Oath", desc: "ECI publishes final results, and winning candidates are issued certificates.", rule: "Marks the end of the election process", duration: "Immediate", status: 'upcoming' },
 ];
 
 const TimelineStep = React.memo(({ step, isExpanded, onToggle }) => {
@@ -42,9 +29,14 @@ const TimelineStep = React.memo(({ step, isExpanded, onToggle }) => {
       <div className={`absolute left-3 top-6 bottom-0 w-0.5 ${borderClass}`} />
       
       {/* Node */}
-      <div className="absolute left-0 top-0 bg-dark-bg p-0.5 rounded-full z-10" onClick={onToggle}>
+      <button 
+        className="absolute left-0 top-0 bg-dark-bg p-0.5 rounded-full z-10" 
+        onClick={onToggle}
+        aria-label={`Toggle Step ${step.id}: ${step.title}`}
+        aria-expanded={isExpanded}
+      >
         {getIcon()}
-      </div>
+      </button>
 
       <div 
         onClick={onToggle}
@@ -86,8 +78,25 @@ const TimelineStep = React.memo(({ step, isExpanded, onToggle }) => {
   );
 });
 
+TimelineStep.propTypes = {
+  step: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
+    duration: PropTypes.string.isRequired,
+    desc: PropTypes.string.isRequired,
+    rule: PropTypes.string.isRequired
+  }).isRequired,
+  isExpanded: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired
+};
+
 const TimelineTab = () => {
   const [expandedId, setExpandedId] = useState(4); // default expanded is the current one
+
+  const handleToggle = useCallback((id) => {
+    setExpandedId(prev => prev === id ? null : id);
+  }, []);
 
   return (
     <div className="space-y-8 pb-8">
@@ -97,12 +106,12 @@ const TimelineTab = () => {
       </div>
 
       <div className="bg-dark-card border border-gray-800 rounded-xl p-4">
-        {timelineSteps.map((step) => (
+        {TIMELINE_STEPS.map((step) => (
           <TimelineStep 
             key={step.id} 
             step={step} 
             isExpanded={expandedId === step.id}
-            onToggle={() => setExpandedId(expandedId === step.id ? null : step.id)}
+            onToggle={() => handleToggle(step.id)}
           />
         ))}
       </div>
@@ -129,4 +138,4 @@ const TimelineTab = () => {
   );
 };
 
-export default TimelineTab;
+export default React.memo(TimelineTab);
